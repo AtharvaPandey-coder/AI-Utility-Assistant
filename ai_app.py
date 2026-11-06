@@ -53,7 +53,7 @@ async def main():
                     "Explain what each available tool does when asked. "
                     "Never invent tool execution results. "
                     "If a tool fails, explain the error clearly. "
-                    "If no tool is required, answer directly."
+                    "If no tool is required, answer directly"
                 )
             },
             {

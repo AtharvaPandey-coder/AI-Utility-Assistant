@@ -1,8 +1,11 @@
 from mcp.server.mcpserver import MCPServer
-
+import os
+from dotenv import load_dotenv
+from groq import Groq
 mcp=MCPServer("Ai Utility Assistant")
 
-
+load_dotenv()
+groq_client=Groq(api_key=os.getenv('GROQ_API_KEY'))
 # Addittion
 @mcp.tool()
 def add(a:int,b:int)->int:
@@ -46,6 +49,29 @@ def analyze_text(text:str)->dict:
         "character_count":len(text),
         "sentence count":sum(text.count(mark) for mark in ".!?"),
     }
+
+@mcp.tool()
+def summarize_text(text:str)->str:
+    """Summarixe length text into small summary"""
+
+    if not text.strip():
+        raise ValueError("Text cannot be empty")
+
+    response=groq_client.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        messages=[
+            {
+                "role":"system",
+                "content":"Summarize the given text clearly.Preserve its important information."
+            },
+            {
+                'role':'user',
+                'content':text
+            }
+        ]
+    )
+    return response.choices[0].message.content
+
 
 
 

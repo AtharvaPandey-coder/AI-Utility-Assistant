@@ -32,6 +32,21 @@ async def main():
             "count_words",
             {"text":"MCP Connects Ai application with external tools"}
         )
+        result3=await client.call_tool(
+            "summarize_text",
+            {
+            "text": """
+            Artificial Intelligence is transforming many industries.
+            Machine learning allows computers to learn patterns from data.
+            Natural Language Processing helps computers understand human language.
+            Large Language Models can generate text, answer questions,
+            summarize documents, and assist users with complex tasks.
+            """
+            }
+        )
+        
+
+        print([item.text for item in result3.content if hasattr(item, "text")])
 
         print("words Count")
         print(result2.content)
