@@ -72,7 +72,56 @@ def summarize_text(text:str)->str:
     )
     return response.choices[0].message.content
 
+@mcp.tool()
+def sentiment_analysis(text:str)->str:
+    """Analyze the text and give a sentiment and possible emotions"""
 
+    if not text.strip():
+        raise ValueError("Text cannot be empty .Enter a valid a text")
+
+    if len(text) > 10000:
+        raise ValueError("text length is too long.")
+
+    response =groq_client.chat.completions.create(
+        model="openai/gpt-oss-20b",
+        messages=[
+            {
+                "role":"system",
+                "content":"""
+                You are a text sentiment and emotion analysis assistant.
+
+                Analyze the user's text and identify:
+                1. Sentiment: Positive, Negative, or Neutral.
+                2. Possible emotion: Stress, sadness, happiness,
+                frustration, excitement, worry, or calmness.
+                3. Explanation: Briefly explain which words or
+                expressions indicate this sentiment and emotion.
+
+                 Important:
+                - Identify possible emotions expressed in the text.
+                - Do not diagnose mental health conditions.
+                - Do not assume you know the user's actual mental state.
+                - If there is insufficient information, say so.
+
+                Return your response in this format:
+
+                Sentiment:
+                Possible Emotion:
+                Explanation:
+
+"""
+            },
+            {
+                "role":"user",
+                "content":text
+            }
+        ]
+    )
+    result=response.choices[0].message.content
+    if not result:
+        raise RuntimeError("Sentiment analysis returned an empty response.")
+
+    return result.strip()
 
 
 if __name__ == "__main__":

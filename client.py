@@ -44,7 +44,15 @@ async def main():
             """
             }
         )
-        
+
+        result4=await client.call_tool(
+            "sentiment_analysis",
+            {
+                "text": "I have too much work, my exams are approaching, and I feel overwhelmed."
+            }
+        )
+
+        print([item.text for item in result4.content if hasattr(item,"text")])
 
         print([item.text for item in result3.content if hasattr(item, "text")])
 
