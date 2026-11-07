@@ -72,56 +72,74 @@ def summarize_text(text:str)->str:
     )
     return response.choices[0].message.content
 
+
 @mcp.tool()
-def sentiment_analysis(text:str)->str:
-    """Analyze the text and give a sentiment and possible emotions"""
+def sentiment_analysis(text: str) -> str:
+    """Analyze sentiment, identify possible emotions, and provide personalized wellness suggestions."""
 
     if not text.strip():
-        raise ValueError("Text cannot be empty .Enter a valid a text")
+        raise ValueError("Text cannot be empty")
 
     if len(text) > 10000:
-        raise ValueError("text length is too long.")
+        raise ValueError("Text is too long. Maximum 10000 characters allowed.")
 
-    response =groq_client.chat.completions.create(
+    response = groq_client.chat.completions.create(
         model="openai/gpt-oss-20b",
         messages=[
             {
-                "role":"system",
-                "content":"""
-                You are a text sentiment and emotion analysis assistant.
+                "role": "system",
+                "content": """
+                You are an AI Sentiment Analysis and Wellness Assistant.
 
-                Analyze the user's text and identify:
-                1. Sentiment: Positive, Negative, or Neutral.
-                2. Possible emotion: Stress, sadness, happiness,
-                frustration, excitement, worry, or calmness.
-                3. Explanation: Briefly explain which words or
-                expressions indicate this sentiment and emotion.
+                Analyze the user's text and provide the following:
 
-                 Important:
-                - Identify possible emotions expressed in the text.
+                1. SENTIMENT:
+                   Classify the sentiment as Positive, Negative, or Neutral.
+
+                2. POSSIBLE EMOTION:
+                   Identify the possible emotion expressed, such as
+                   stress, sadness, happiness, frustration,
+                   excitement, worry, or calmness.
+
+                3. EXPLANATION:
+                   Briefly explain why you identified this sentiment
+                   and possible emotion.
+
+                4. WELLNESS SUGGESTIONS:
+                   Provide 4-5 practical wellness tips based on
+                   the user's expressed feelings and situation.
+
+                5. ACTION FOR TODAY:
+                   Suggest one small action the user can try today.
+
+                IMPORTANT GUIDELINES:
+                - Be empathetic, supportive, and non-judgmental.
+                - Give practical and realistic suggestions.
                 - Do not diagnose mental health conditions.
-                - Do not assume you know the user's actual mental state.
-                - If there is insufficient information, say so.
+                - Do not claim to know the user's actual mental state.
+                - Do not recommend medication or medical treatment.
+                - Do not guarantee that suggestions will solve problems.
+                - If the user expresses immediate risk of self-harm,
+                  prioritize immediate support from trusted people
+                  and local emergency or crisis services.
 
-                Return your response in this format:
-
-                Sentiment:
-                Possible Emotion:
-                Explanation:
-
-"""
+                Use clear headings and bullet points in your response.
+                """
             },
             {
-                "role":"user",
-                "content":text
+                "role": "user",
+                "content": text
             }
         ]
     )
-    result=response.choices[0].message.content
+
+    result = response.choices[0].message.content
+
     if not result:
-        raise RuntimeError("Sentiment analysis returned an empty response.")
+        raise RuntimeError("Wellness analysis returned an empty response.")
 
     return result.strip()
+
 
 
 if __name__ == "__main__":
