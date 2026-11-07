@@ -141,21 +141,6 @@ The assistant selects `summarize_text`, which uses Groq to generate a concise su
                  FINAL RESPONSE
 ```
 
-### Sentiment Analysis
-
-- Analyzes user-provided text using the Groq LLM.
-- Classifies sentiment as Positive, Negative, or Neutral.
-- Identifies possible emotions such as stress, sadness, happiness, frustration, and excitement.
-- Provides a short explanation for the classification.
-- Includes input validation and text-length restrictions.
-
-**Example input:**
-"I have too much work, my exams are approaching, and I feel overwhelmed."
-
-**Example output:**
-- Sentiment: Negative
-- Possible Emotion: Stress
-- Explanation: The text expresses feeling overwhelmed because of workload and upcoming exams.
 ## ⚙️ How It Works
 
 1. The user submits a natural-language request.
