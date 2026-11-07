@@ -140,6 +140,31 @@ The assistant selects `summarize_text`, which uses Groq to generate a concise su
                         v
                  FINAL RESPONSE
 ```
+###  AI Sentiment Analysis and Wellness Support
+
+An AI-powered sentiment analysis tool that analyzes user-provided text and provides personalized wellness suggestions using Groq LLM.
+
+**Key capabilities:**
+- Classifies sentiment as Positive, Negative, or Neutral.
+- Identifies possible emotions such as stress, sadness, happiness, frustration, and worry.
+- Explains the reasoning behind the sentiment and emotion classification.
+- Provides 4–5 practical wellness suggestions based on the user's input.
+- Recommends one small action the user can try today.
+- Validates empty input and limits text length to 10,000 characters.
+- Uses empathetic and non-judgmental responses.
+
+**Example input:**
+
+"I have too much work, my exams are approaching, and I feel overwhelmed."
+
+**Example output:**
+- Sentiment: Negative
+- Possible Emotion: Stress
+- Explanation: The text expresses feeling overwhelmed due to workload and upcoming exams.
+- Wellness Suggestions: Break tasks into smaller steps, take short breaks, and try breathing exercises.
+- Action for Today: Choose one manageable task and work on it for 20 minutes.
+
+**Note:** This feature provides general wellness suggestions and does not diagnose mental health conditions or replace professional support.
 
 ## ⚙️ How It Works
 
