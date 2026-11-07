@@ -267,8 +267,6 @@ Through this project, I explored:
 ## 🔮 Future Improvements
 
 Planned enhancements:
-
-- [ ] Groq-powered sentiment analysis.
 - [ ] Multi-tool execution for complex user requests.
 - [ ] Python code explanation and debugging assistant.
 - [ ] PDF document analysis and RAG integration.
