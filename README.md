@@ -166,6 +166,25 @@ An AI-powered sentiment analysis tool that analyzes user-provided text and provi
 
 **Note:** This feature provides general wellness suggestions and does not diagnose mental health conditions or replace professional support.
 
+### 🔄 Multi-Round Tool Orchestration
+
+Implemented multi-round tool orchestration using Groq and the Model Context Protocol (MCP).
+
+**Key capabilities:**
+- Supports multiple MCP tool calls within a single user request.
+- Executes tools dynamically based on the AI model's decisions.
+- Sends tool execution results back to the LLM.
+- Allows the LLM to request additional tools across multiple rounds.
+- Combines outputs from multiple tools into one final response.
+- Includes a maximum iteration limit to prevent endless tool execution.
+- Handles tool execution exceptions and returns error information to the AI model.
+
+**Workflow:**
+
+`User Input → Groq LLM → MCP Tool Calls → Tool Results → Groq LLM → Final Response`
+
+This implementation enables the assistant to handle more complex, multi-step tasks instead of relying on a single tool-calling round.
+
 ## ⚙️ How It Works
 
 1. The user submits a natural-language request.
