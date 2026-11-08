@@ -19,7 +19,7 @@ async def main():
             "add", {"a": 20, "b": 50}
         )
 
-        print("Addition content")
+        print("Addition content..")
         print(result.content)
 
         result1 = await client.call_tool(

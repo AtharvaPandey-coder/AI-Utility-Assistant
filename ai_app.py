@@ -63,45 +63,61 @@ async def main():
                 "content":user_input
             }
         ]
-        response=await client_ai.chat.completions.create(
+        max_iterations=5
+
+        for iteration in range(max_iterations):
+            response=await client_ai.chat.completions.create(
             model=model,
             messages=messages,
             tools=groq_tools,
             tool_choice="auto"
         )
-        assistant_message=response.choices[0].message
+            assistant_message=response.choices[0].message
+        #check wheter grok wants to call the tool
+            if not assistant_message.tool_calls:
+                print("Ask your AI Utility Assistant : ")
+                print(assistant_message.content)
+                break
 
-        if assistant_message.tool_calls:
-            messages.append(assistant_message.model_dump(exclude_none=True))
+        #save assistant tool calls message
+            messages.append(
+            assistant_message.model_dump(exclude_none=True)
+        )   
 
+        #Execute all requested tools
             for tool_call in assistant_message.tool_calls:
+                
+                
                 tool_name=tool_call.function.name
                 arguments=json.loads(tool_call.function.arguments)
 
-                result=await mcp_client.call_tool(
+                print(f"executing tool : {tool_name}")
+                try:
+                    result=await mcp_client.call_tool(
                     tool_name,arguments
                 )
+                    #extract the output
+                    content="\n".join(item.text for item in result.content if hasattr(item,"text"))
 
-                #extract the output
-                content="\n".join(item.text for item in result.content if hasattr(item,"text"))
-
-                messages.append({
+                    if not content:
+                        content ="Tool returned no text output"
+                        
+                    messages.append({
                     'role':'tool',
                     'tool_call_id':tool_call.id,
                     'content':content
-                })
+                    })
+                except Exception as e:
+                    error_message=f"Tool execution failed : {str(e)}"
 
-            final_response=await client_ai.chat.completions.create(
-                model=model,
-                messages=messages,
-                tool_choice="none"
-            )
-            print(final_response.choices[0].message.content)
+                    messages.append({
+                        'role':'tool',
+                        'tool_call_id':tool_call.id,
+                        'content':error_message
+                    })
         else:
-            print(assistant_message.content)
-
+            print("\n Maximum Tool execution reached")
         
-
 
 if __name__=="__main__":
     asyncio.run(main())
