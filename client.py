@@ -54,7 +54,7 @@ async def main():
                 }
             )
 
-            print("Sentiment analysis..")
+            print("Analysis of the Sentiment : ")
 
             print([
                 item.text
