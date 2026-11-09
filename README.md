@@ -392,7 +392,6 @@ Through this project, I explored:
 
 The following enhancements are planned:
 
-- [ ] SQLite database integration using real e-commerce data.
 - [ ] MCP tools for structured database operations.
 - [ ] Natural-language database querying.
 - [ ] Conversation history and session memory.
@@ -402,7 +401,9 @@ The following enhancements are planned:
 - [ ] AI response evaluation and testing.
 - [ ] Streamlit chat interface.
 - [ ] Application deployment.
-
+- [ ] MySQL integration using the existing Pizza Sales database.
+- [ ] MCP tools for SQL-based business analytics.
+- [ ] Natural-language business queries using Groq.
 ---
 
 ## 👨‍💻 Author
