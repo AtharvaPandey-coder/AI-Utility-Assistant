@@ -1,8 +1,8 @@
 # MCP AI Utility Assistant 🤖
 
-An AI-powered utility assistant built using **Python, Model Context Protocol (MCP), and Groq LLM**. The project demonstrates how an LLM can dynamically discover, select, and execute external Python tools through an MCP client-server architecture.
+An AI-powered utility assistant built using **Python, Model Context Protocol (MCP), and Groq LLM**. This project demonstrates how an LLM can dynamically discover, select, and execute external Python tools through an MCP client-server architecture.
 
-The assistant supports mathematical operations, text analysis, and AI-powered text summarization through reusable MCP tools.
+The assistant supports mathematical operations, text analysis, AI-powered summarization, sentiment analysis, and wellness suggestions. It also implements **multi-round tool orchestration**, allowing the LLM to execute multiple tools across multiple interaction rounds to handle complex user requests.
 
 ---
 
@@ -14,7 +14,9 @@ This project explores a more modular approach using the **Model Context Protocol
 
 An MCP server exposes reusable Python tools, while an MCP client connects to the server and makes those tools available to a Groq-powered LLM.
 
-The LLM understands the user's request, selects an appropriate tool, provides the required arguments, and receives the execution result to generate a natural-language response.
+The LLM understands the user's request, selects appropriate tools, provides the required arguments, receives execution results, and generates a natural-language response.
+
+Unlike a basic single-round tool-calling implementation, this assistant supports **multi-round tool orchestration**, allowing the LLM to request additional tools based on the results of previous executions.
 
 ## ✨ Features
 
@@ -22,50 +24,51 @@ The LLM understands the user's request, selects an appropriate tool, provides th
 - **Dynamic Tool Discovery:** Automatically discovers available tools from the MCP server.
 - **LLM-Based Tool Selection:** Uses Groq LLM to select appropriate tools based on user requests.
 - **Dynamic Schema Conversion:** Converts MCP tool input schemas into Groq-compatible function schemas.
-- **Tool Execution:** Executes selected Python functions through the MCP client.
+- **Multi-Tool Execution:** Supports multiple MCP tool calls within a single LLM response.
+- **Multi-Round Tool Orchestration:** Allows the LLM to request additional tools across multiple interaction rounds.
 - **Mathematical Operations:** Supports addition and multiplication.
 - **Text Analysis:** Calculates word count, character count, and sentence count.
-- **AI-Powered Summarization:** Uses Groq LLM to generate concise summaries of text.
-- **Input Validation:** Includes basic validation to handle invalid inputs.
+- **AI-Powered Summarization:** Uses Groq LLM to generate concise summaries.
+- **Sentiment Analysis:** Identifies positive, negative, or neutral sentiment.
+- **Emotion Identification:** Identifies possible emotions expressed in user-provided text.
+- **Wellness Support:** Provides practical, non-clinical wellness suggestions based on the analyzed text.
+- **Input Validation:** Includes validation for mathematical and text-processing operations.
+- **Error Handling:** Handles tool execution exceptions and passes error information back to the LLM.
+- **Execution Limit:** Uses a maximum iteration limit to prevent endless tool-calling loops.
 
-## 🛠️ Technologies Used
-
-| Technology | Purpose |
-|---|---|
-| Python | Core programming language |
-| MCP | Standardized communication between AI applications and tools |
-| Groq API | LLM integration and text summarization |
-| AsyncIO | Asynchronous client operations |
-| python-dotenv | Environment variable management |
-| JSON | Tool schema conversion and argument handling |
+---
 
 ## 🧰 Available MCP Tools
 
-The MCP server currently exposes five tools.
+The MCP server currently exposes six tools.
 
-| Tool | Description |
-|---|---|
-| `add` | Adds two numbers |
-| `multiplication` | Multiplies two numbers |
-| `count_words` | Counts the number of words in a text |
-| `analyze_text` | Returns word count, character count, and sentence count |
-| `summarize_text` | Generates a concise summary using Groq LLM |
+| Tool                 | Description                                                                  |
+| -------------------- | ---------------------------------------------------------------------------- |
+| `add`                | Adds two numbers                                                             |
+| `multiplication`     | Multiplies two numbers                                                       |
+| `count_words`        | Counts the number of words in a text                                         |
+| `analyze_text`       | Returns word count, character count, and sentence count                      |
+| `summarize_text`     | Generates a concise summary using Groq LLM                                   |
+| `sentiment_analysis` | Identifies sentiment and possible emotions and provides wellness suggestions |
 
 ### Example Tool Usage
 
 **1. Mathematical operation**
 
 Input:
+
 ```text
 Multiply 25 by 40.
 ```
 
 Selected MCP tool:
+
 ```text
 multiplication
 ```
 
 Arguments:
+
 ```json
 {
   "a": 25,
@@ -74,6 +77,7 @@ Arguments:
 ```
 
 Result:
+
 ```text
 1000
 ```
@@ -81,6 +85,7 @@ Result:
 **2. Text analysis**
 
 Input:
+
 ```text
 Analyze this text: MCP connects AI applications with external tools.
 ```
@@ -90,100 +95,161 @@ The assistant can select `analyze_text` to calculate basic text statistics.
 **3. Text summarization**
 
 Input:
+
 ```text
 Summarize this text: Artificial Intelligence is transforming many industries...
 ```
 
 The assistant selects `summarize_text`, which uses Groq to generate a concise summary.
 
+**4. Sentiment analysis and wellness support**
+
+Input:
+
+```text
+I have too much work, my exams are approaching, and I feel overwhelmed.
+```
+
+The assistant selects `sentiment_analysis` to:
+
+- Classify the sentiment.
+- Identify possible emotions.
+- Explain the classification.
+- Provide practical wellness suggestions.
+- Recommend one small action to try today.
+
+**Note:** This feature provides general wellness suggestions. It does not diagnose mental health conditions or replace professional support.
+
+---
+
+## 🔄 Multi-Round Tool Orchestration
+
+One of the key features of this project is multi-round tool orchestration using Groq and MCP.
+
+Instead of stopping after one round of tool execution, the application allows the LLM to receive tool results, evaluate them, and request additional tools when necessary.
+
+### Key Capabilities
+
+- Supports multiple MCP tool calls within a single user request.
+- Executes tools dynamically based on the LLM's decisions.
+- Sends tool execution results back to the LLM.
+- Allows additional tool calls across multiple interaction rounds.
+- Uses previous tool results to support subsequent decisions.
+- Combines multiple tool outputs into one final response.
+- Includes a maximum iteration limit to prevent endless tool execution.
+- Handles tool execution exceptions and returns error information to the LLM.
+
+### Workflow
+
+```text
+User Input
+    |
+    v
+Groq LLM
+    |
+    v
+Tool Selection
+    |
+    v
+MCP Client
+    |
+    v
+MCP Server
+    |
+    v
+Tool Execution
+    |
+    v
+Tool Results
+    |
+    v
+Groq LLM
+    |
+    +----> Additional Tool Calls (if needed)
+    |               |
+    |               v
+    |          MCP Server
+    |               |
+    |               v
+    |          Tool Results
+    |               |
+    +---------------+
+    |
+    v
+Final Response
+```
+
+This enables the assistant to handle complex requests that require multiple tools and multiple execution rounds.
+
+### Example Multi-Tool Request
+
+```text
+Analyze this text, identify its sentiment and emotions,
+and summarize it:
+
+I am struggling with assignments and deadlines.
+I feel stressed and sometimes doubt my abilities,
+but I am trying to stay motivated.
+```
+
+Depending on the LLM's tool-selection decisions, it can use tools such as:
+
+- `analyze_text`
+- `sentiment_analysis`
+- `summarize_text`
+
+The results are returned to Groq, which generates a combined response.
+
+---
+
 ## 🏗️ System Architecture
 
 ```text
-              USER
-                |
-                v
-         AI APPLICATION
-             (ai_app.py)
-                |
-                v
-           GROQ LLM
-                |
-        Tool Selection
-                |
-                v
-           MCP CLIENT
-                |
-          MCP Protocol
-                |
-                v
-           MCP SERVER
-             (server.py)
-                |
-        +-------+-------+
-        |       |       |
-        v       v       v
-      Math    Text    Summary
-      Tools   Tools    Tool
-                        |
-                        v
-                    GROQ LLM
-                        |
-                        v
-                 Summary Result
-                        |
-                        v
-                 MCP CLIENT
-                        |
-                        v
-                 AI APPLICATION
-                        |
-                        v
-                 FINAL RESPONSE
+                 USER
+                   |
+                   v
+             AI APPLICATION
+                (ai_app.py)
+                   |
+                   v
+                GROQ LLM
+                   |
+             Tool Selection
+                   |
+                   v
+               MCP CLIENT
+                   |
+              MCP Protocol
+                   |
+                   v
+               MCP SERVER
+                (server.py)
+                   |
+          +--------+--------+
+          |        |        |
+          v        v        v
+        Math     Text    AI-Powered
+        Tools    Tools     Tools
+          |        |        |
+          +--------+--------+
+                   |
+                   v
+              Tool Results
+                   |
+                   v
+                GROQ LLM
+                   |
+          Additional Tool Calls
+              (if needed)
+                   |
+                   v
+              Final Response
+                   |
+                   v
+             USER OUTPUT
 ```
-###  AI Sentiment Analysis and Wellness Support
 
-An AI-powered sentiment analysis tool that analyzes user-provided text and provides personalized wellness suggestions using Groq LLM.
-
-**Key capabilities:**
-- Classifies sentiment as Positive, Negative, or Neutral.
-- Identifies possible emotions such as stress, sadness, happiness, frustration, and worry.
-- Explains the reasoning behind the sentiment and emotion classification.
-- Provides 4–5 practical wellness suggestions based on the user's input.
-- Recommends one small action the user can try today.
-- Validates empty input and limits text length to 10,000 characters.
-- Uses empathetic and non-judgmental responses.
-
-**Example input:**
-
-"I have too much work, my exams are approaching, and I feel overwhelmed."
-
-**Example output:**
-- Sentiment: Negative
-- Possible Emotion: Stress
-- Explanation: The text expresses feeling overwhelmed due to workload and upcoming exams.
-- Wellness Suggestions: Break tasks into smaller steps, take short breaks, and try breathing exercises.
-- Action for Today: Choose one manageable task and work on it for 20 minutes.
-
-**Note:** This feature provides general wellness suggestions and does not diagnose mental health conditions or replace professional support.
-
-### 🔄 Multi-Round Tool Orchestration
-
-Implemented multi-round tool orchestration using Groq and the Model Context Protocol (MCP).
-
-**Key capabilities:**
-- Supports multiple MCP tool calls within a single user request.
-- Executes tools dynamically based on the AI model's decisions.
-- Sends tool execution results back to the LLM.
-- Allows the LLM to request additional tools across multiple rounds.
-- Combines outputs from multiple tools into one final response.
-- Includes a maximum iteration limit to prevent endless tool execution.
-- Handles tool execution exceptions and returns error information to the AI model.
-
-**Workflow:**
-
-`User Input → Groq LLM → MCP Tool Calls → Tool Results → Groq LLM → Final Response`
-
-This implementation enables the assistant to handle more complex, multi-step tasks instead of relying on a single tool-calling round.
+---
 
 ## ⚙️ How It Works
 
@@ -191,13 +257,30 @@ This implementation enables the assistant to handle more complex, multi-step tas
 2. The MCP client connects to the MCP server.
 3. Available tools are discovered dynamically using MCP.
 4. MCP tool schemas are converted into Groq-compatible function schemas.
-5. The Groq LLM analyzes the request and selects an appropriate tool.
-6. The application extracts the tool name and arguments.
-7. The MCP client executes the selected tool on the MCP server.
-8. The tool result is returned to the LLM.
-9. Groq generates the final natural-language response.
+5. The Groq LLM analyzes the request and selects appropriate tools.
+6. The application extracts the tool names and arguments.
+7. The MCP client executes the selected tools on the MCP server.
+8. Tool execution results are returned to the LLM.
+9. The LLM can request additional tools based on previous results.
+10. The process continues until the LLM generates a final response or the maximum iteration limit is reached.
 
-For summarization, the `summarize_text` MCP tool independently calls Groq to process the supplied text.
+For summarization and sentiment analysis, the corresponding MCP tools independently use Groq to process the supplied text.
+
+---
+
+## 🛠️ Technologies Used
+
+| Technology                   | Purpose                                                      |
+| ---------------------------- | ------------------------------------------------------------ |
+| Python                       | Core programming language                                    |
+| Model Context Protocol (MCP) | Standardized communication between AI applications and tools |
+| Groq API                     | LLM integration and AI-powered text processing               |
+| AsyncIO                      | Asynchronous client operations                               |
+| JSON                         | Tool schema conversion and argument handling                 |
+| python-dotenv                | Environment variable management                              |
+
+---
+
 ## 🔧 Installation and Setup
 
 ### 1. Clone the repository
@@ -212,7 +295,7 @@ git clone https://github.com/AtharvaPandey-coder/MCP-AI-Utility-Assistant.git
 cd MCP-AI-Utility-Assistant
 ```
 
-### 3. Create a virtual environment (recommended)
+### 3. Create a virtual environment
 
 ```bash
 python -m venv venv
@@ -240,13 +323,15 @@ GROQ_API_KEY=your_groq_api_key
 
 Get your API key from the Groq developer console:
 
-https://console.groq.com/
+[https://console.groq.com/](https://console.groq.com/)
 
 **Important:** Never upload your `.env` file or expose your API key publicly.
 
+---
+
 ## ▶️ Running the Project
 
-### Test the MCP server tools
+### Test MCP server tools
 
 Run:
 
@@ -264,20 +349,26 @@ Run:
 python ai_app.py
 ```
 
-Enter a natural-language request and let the LLM select and execute the appropriate MCP tool.
+Enter a natural-language request and let the LLM select and execute the appropriate MCP tools.
+
+---
 
 ## 🔐 Security and Validation
 
-The project includes basic input validation for mathematical and text-processing operations.
+The project includes basic input validation and error handling for tool operations.
 
 Examples include:
 
-- Restricting the allowed numerical input range.
+- Restricting allowed numerical input ranges.
 - Rejecting empty text inputs.
+- Limiting the maximum input length for text-processing operations.
 - Keeping API credentials in environment variables.
-- Avoiding hardcoded API keys in source code.
+- Handling tool execution exceptions.
+- Limiting the maximum number of tool-calling rounds.
 
-These are basic safeguards for a learning project, not a complete production security implementation.
+These safeguards are intended for a learning and development project and do not represent a complete production security implementation.
+
+---
 
 ## 📚 Learning Outcomes
 
@@ -289,19 +380,30 @@ Through this project, I explored:
 - Converting MCP tool schemas into LLM-compatible function schemas.
 - Integrating Groq with MCP.
 - LLM-based function calling and argument extraction.
+- Multi-tool execution and multi-round orchestration.
 - Returning tool execution results to an LLM.
 - Asynchronous Python programming.
 - Input validation and basic error handling.
+- Building AI-powered text analysis and summarization tools.
+
+---
 
 ## 🔮 Future Improvements
 
-Planned enhancements:
-- [ ] Multi-tool execution for complex user requests.
-- [ ] Python code explanation and debugging assistant.
-- [ ] PDF document analysis and RAG integration.
+The following enhancements are planned:
+
+- [ ] SQLite database integration using real e-commerce data.
+- [ ] MCP tools for structured database operations.
+- [ ] Natural-language database querying.
 - [ ] Conversation history and session memory.
-- [ ] Continuous conversation with an exit command.
-- [ ] Improved error handling and user interface.
+- [ ] Context-aware follow-up questions.
+- [ ] Advanced business analytics.
+- [ ] Improved security, validation, and logging.
+- [ ] AI response evaluation and testing.
+- [ ] Streamlit chat interface.
+- [ ] Application deployment.
+
+---
 
 ## 👨‍💻 Author
 
@@ -313,4 +415,7 @@ AI/ML and Generative AI Enthusiast
 
 ---
 
-⭐ If you find this project interesting, consider giving the repository a star!
+**Project Status:** Actively under development.
+
+More capabilities will be added as the project evolves into a more comprehensive MCP-powered AI assistant.
+
