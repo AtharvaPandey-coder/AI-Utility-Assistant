@@ -4,6 +4,8 @@ An AI-powered utility assistant built using **Python, Model Context Protocol (MC
 
 The assistant supports mathematical operations, text analysis, AI-powered summarization, sentiment analysis, and wellness suggestions. It also implements **multi-round tool orchestration**, allowing the LLM to execute multiple tools across multiple interaction rounds to handle complex user requests.
 
+The project is also being extended with **SQLite database integration**, allowing CSV datasets to be imported into a database and their schemas to be discovered automatically.
+
 ---
 
 ## 🚀 Project Overview
@@ -18,7 +20,11 @@ The LLM understands the user's request, selects appropriate tools, provides the 
 
 Unlike a basic single-round tool-calling implementation, this assistant supports **multi-round tool orchestration**, allowing the LLM to request additional tools based on the results of previous executions.
 
+Additionally, the project includes a database integration component that imports CSV datasets into SQLite and automatically inspects their database structure.
+
 ## ✨ Features
+
+### MCP and AI Features
 
 - **MCP Client-Server Architecture:** Separates AI application logic from external tool functionality.
 - **Dynamic Tool Discovery:** Automatically discovers available tools from the MCP server.
@@ -36,19 +42,27 @@ Unlike a basic single-round tool-calling implementation, this assistant supports
 - **Error Handling:** Handles tool execution exceptions and passes error information back to the LLM.
 - **Execution Limit:** Uses a maximum iteration limit to prevent endless tool-calling loops.
 
+### Database Integration Features
+
+- **CSV Import:** Imports CSV datasets into SQLite using Pandas.
+- **Automatic Table Creation:** Creates database tables using CSV filenames.
+- **Database Schema Inspection:** Discovers available tables and their columns.
+- **Column Metadata Extraction:** Retrieves column names, data types, NOT NULL constraints, default values, and primary-key metadata.
+- **Structured Schema Representation:** Stores discovered database information in Python dictionaries.
+
 ---
 
 ## 🧰 Available MCP Tools
 
 The MCP server currently exposes six tools.
 
-| Tool                 | Description                                                                  |
-| -------------------- | ---------------------------------------------------------------------------- |
-| `add`                | Adds two numbers                                                             |
-| `multiplication`     | Multiplies two numbers                                                       |
-| `count_words`        | Counts the number of words in a text                                         |
-| `analyze_text`       | Returns word count, character count, and sentence count                      |
-| `summarize_text`     | Generates a concise summary using Groq LLM                                   |
+| Tool | Description |
+|---|---|
+| `add` | Adds two numbers |
+| `multiplication` | Multiplies two numbers |
+| `count_words` | Counts the number of words in a text |
+| `analyze_text` | Returns word count, character count, and sentence count |
+| `summarize_text` | Generates a concise summary using Groq LLM |
 | `sentiment_analysis` | Identifies sentiment and possible emotions and provides wellness suggestions |
 
 ### Example Tool Usage
@@ -71,8 +85,8 @@ Arguments:
 
 ```json
 {
-  "a": 25,
-  "b": 40
+    "a": 25,
+    "b": 40
 }
 ```
 
@@ -202,56 +216,152 @@ The results are returned to Groq, which generates a combined response.
 
 ---
 
+## 🗄️ Database Integration
+
+The project includes a SQLite database integration component that converts CSV datasets into structured database tables.
+
+The purpose is to make the application capable of understanding different datasets through automatic database schema inspection.
+
+### 1. CSV to SQLite Conversion
+
+CSV files are imported using Pandas and stored as tables inside an SQLite database.
+
+The database creation script automatically:
+
+- Reads CSV files from the `data/` directory.
+- Uses CSV filenames as table names.
+- Creates corresponding SQLite tables.
+- Imports the CSV records into the database.
+
+### 2. Automatic Schema Inspection
+
+The project includes a schema inspection script that discovers the structure of the generated SQLite database.
+
+It retrieves:
+
+- Database table names.
+- Column names.
+- Column data types.
+- NOT NULL constraints.
+- Default values.
+- Primary-key metadata.
+
+The discovered information is stored in a structured Python dictionary, making it reusable by other application components.
+
+### Database Directory Structure
+
+```text
+database/
+│
+├── create_database.py
+├── inspect_schema.py
+└── pizza_sales.db
+```
+
+### Create the SQLite Database
+
+Run the following command from the project root:
+
+```bash
+python database/create_database.py
+```
+
+### Inspect the Database Schema
+
+Run:
+
+```bash
+python database/inspect_schema.py
+```
+
+The script discovers the available tables and displays their column information.
+
+**Note:** The SQLite database is generated locally and is excluded from Git tracking. CSV datasets should only be redistributed when their licenses permit it.
+
+### Current Development Status
+
+The CSV-to-SQLite import and schema inspection components have been implemented and tested.
+
+MCP integration for database schema discovery and dynamic SQL execution is planned as the next development stage.
+
+---
+
 ## 🏗️ System Architecture
 
 ```text
                  USER
                    |
                    v
-             AI APPLICATION
-                (ai_app.py)
+              AI APPLICATION
+                 (ai_app.py)
                    |
                    v
-                GROQ LLM
+                 GROQ LLM
                    |
-             Tool Selection
-                   |
-                   v
-               MCP CLIENT
-                   |
-              MCP Protocol
+              Tool Selection
                    |
                    v
-               MCP SERVER
-                (server.py)
+                MCP CLIENT
                    |
-          +--------+--------+
-          |        |        |
-          v        v        v
-        Math     Text    AI-Powered
-        Tools    Tools     Tools
-          |        |        |
-          +--------+--------+
+               MCP Protocol
                    |
                    v
-              Tool Results
+                MCP SERVER
+                 (server.py)
+                   |
+           +--------+--------+
+           |        |        |
+           v        v        v
+         Math     Text    AI-Powered
+         Tools    Tools     Tools
+           |        |        |
+           +--------+--------+
                    |
                    v
-                GROQ LLM
-                   |
-          Additional Tool Calls
-              (if needed)
+               Tool Results
                    |
                    v
-              Final Response
+                 GROQ LLM
+                   |
+           Additional Tool Calls
+               (if needed)
                    |
                    v
-             USER OUTPUT
+               Final Response
+                   |
+                   v
+              USER OUTPUT
+```
+
+### Database Processing Architecture
+
+```text
+             CSV DATASETS
+                   |
+                   v
+             Pandas Import
+                   |
+                   v
+              SQLite DB
+                   |
+                   v
+          Schema Inspection
+                   |
+                   v
+          Structured Schema
+                   |
+                   v
+        Planned MCP Integration
+                   |
+                   v
+       Dynamic SQL Analytics
 ```
 
 ---
 
 ## ⚙️ How It Works
+
+### MCP Workflow
 
 1. The user submits a natural-language request.
 2. The MCP client connects to the MCP server.
@@ -266,18 +376,30 @@ The results are returned to Groq, which generates a combined response.
 
 For summarization and sentiment analysis, the corresponding MCP tools independently use Groq to process the supplied text.
 
+### Database Workflow
+
+1. CSV datasets are placed inside the `data/` directory.
+2. The database creation script reads the CSV files.
+3. Pandas imports their contents into SQLite tables.
+4. The schema inspection script discovers the available tables and column metadata.
+5. The discovered schema is stored in a reusable Python dictionary.
+6. Database schema discovery will subsequently be exposed through MCP tools.
+
 ---
 
 ## 🛠️ Technologies Used
 
-| Technology                   | Purpose                                                      |
-| ---------------------------- | ------------------------------------------------------------ |
-| Python                       | Core programming language                                    |
+| Technology | Purpose |
+|---|---|
+| Python | Core programming language |
 | Model Context Protocol (MCP) | Standardized communication between AI applications and tools |
-| Groq API                     | LLM integration and AI-powered text processing               |
-| AsyncIO                      | Asynchronous client operations                               |
-| JSON                         | Tool schema conversion and argument handling                 |
-| python-dotenv                | Environment variable management                              |
+| Groq API | LLM integration and AI-powered text processing |
+| AsyncIO | Asynchronous client operations |
+| JSON | Tool schema conversion and argument handling |
+| python-dotenv | Environment variable management |
+| Pandas | CSV processing and database import |
+| SQLite | Lightweight relational database |
+| SQL | Database querying and analysis |
 
 ---
 
@@ -313,6 +435,15 @@ venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+Make sure your `requirements.txt` includes:
+
+```text
+mcp
+groq
+python-dotenv
+pandas
+```
+
 ### 5. Configure environment variables
 
 Create a `.env` file in the project directory:
@@ -323,7 +454,7 @@ GROQ_API_KEY=your_groq_api_key
 
 Get your API key from the Groq developer console:
 
-[https://console.groq.com/](https://console.groq.com/)
+https://console.groq.com/
 
 **Important:** Never upload your `.env` file or expose your API key publicly.
 
@@ -351,6 +482,24 @@ python ai_app.py
 
 Enter a natural-language request and let the LLM select and execute the appropriate MCP tools.
 
+### Create the SQLite Database
+
+Place your CSV datasets inside the `data/` directory and run:
+
+```bash
+python database/create_database.py
+```
+
+### Inspect Database Schema
+
+Run:
+
+```bash
+python database/inspect_schema.py
+```
+
+This displays the discovered database tables and their column metadata.
+
 ---
 
 ## 🔐 Security and Validation
@@ -365,6 +514,8 @@ Examples include:
 - Keeping API credentials in environment variables.
 - Handling tool execution exceptions.
 - Limiting the maximum number of tool-calling rounds.
+
+Database query validation and read-only SQL execution are planned for a future development stage.
 
 These safeguards are intended for a learning and development project and do not represent a complete production security implementation.
 
@@ -385,15 +536,22 @@ Through this project, I explored:
 - Asynchronous Python programming.
 - Input validation and basic error handling.
 - Building AI-powered text analysis and summarization tools.
+- Importing CSV datasets into SQLite.
+- Inspecting database schemas programmatically.
+- Working with SQL database metadata.
+- Organizing database information using Python dictionaries.
 
 ---
 
 ## 🔮 Future Improvements
 
-The following enhancements are planned:
-
-- [ ] MCP tools for structured database operations.
-- [ ] Natural-language database querying.
+- [ ] Expose database schema inspection through MCP tools.
+- [ ] Implement safe, read-only SQL query execution.
+- [ ] Generate SQL dynamically using natural-language questions.
+- [ ] Support multiple uploaded CSV datasets.
+- [ ] Discover and validate relationships between database tables.
+- [ ] Add database query result interpretation.
+- [ ] Generate charts and visualizations from query results.
 - [ ] Conversation history and session memory.
 - [ ] Context-aware follow-up questions.
 - [ ] Advanced business analytics.
@@ -401,9 +559,8 @@ The following enhancements are planned:
 - [ ] AI response evaluation and testing.
 - [ ] Streamlit chat interface.
 - [ ] Application deployment.
-- [ ] MySQL integration using the existing Pizza Sales database.
-- [ ] MCP tools for SQL-based business analytics.
-- [ ] Natural-language business queries using Groq.
+- [ ] MySQL integration.
+
 ---
 
 ## 👨‍💻 Author
@@ -418,5 +575,4 @@ AI/ML and Generative AI Enthusiast
 
 **Project Status:** Actively under development.
 
-More capabilities will be added as the project evolves into a more comprehensive MCP-powered AI assistant.
-
+More capabilities will be added as the project evolves into a more comprehensive MCP-powered AI Data Analytics Assistant.
