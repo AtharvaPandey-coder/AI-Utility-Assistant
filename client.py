@@ -46,6 +46,18 @@ async def main():
             }
         )
 
+
+
+        print("ANSWERING")
+        result99=await client.call_tool(
+            "get_database_schema",
+            arguments={}
+        )
+
+        print(result99.content)
+        print("ANSWERING")
+
+
         try:
             result4 = await client.call_tool(
                 "sentiment_analysis",

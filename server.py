@@ -2,6 +2,7 @@ from mcp.server.mcpserver import MCPServer
 import os
 from dotenv import load_dotenv
 from groq import Groq
+from database.inspect_schema import inspect_schema
 mcp=MCPServer("Ai Utility Assistant")
 
 load_dotenv()
@@ -139,6 +140,17 @@ def sentiment_analysis(text: str) -> str:
         raise RuntimeError("Wellness analysis returned an empty response.")
 
     return result.strip()
+
+@mcp.tool()
+def get_database_schema():
+    """
+    Retrieve the schema of the connected SQLite database.
+    Returns table names, column names, data types and constraints.
+    
+    """
+    schema=inspect_schema()
+
+    return schema
 
 
 
