@@ -2,7 +2,8 @@ from mcp.server.mcpserver import MCPServer
 import os
 from dotenv import load_dotenv
 from groq import Groq
-from database.inspect_schema import inspect_schema
+import sqlite3
+from database.inspect_schema import inspect_schema,DATABASE_LOC
 mcp=MCPServer("Ai Utility Assistant")
 
 load_dotenv()
@@ -152,9 +153,59 @@ def get_database_schema():
 
     return schema
 
+@mcp.tool()
+def execute_sql_query(query):
+    """Execute a read only sql query on the sqlite database
+    and returns the query result and the column names"""
+
+    if not query or not query.strip():
+        return {"error" :"sql query cannont be empty"}
+
+    clean_query=query.strip().upper()
+
+    if not clean_query.startswith(("SELECT","WITH")):
+        return {"error" : "only select query are allowed to use"}
+
+    connection=None
+
+    try:
+        database_uri=DATABASE_LOC.resolve().as_uri() + '?mode=ro'
+
+        connection=sqlite3.connect(
+            database_uri,uri=True
+        )
+        connection.execute("PRAGMA query_only=ON")
+
+        cursor=connection.cursor()
+
+        cursor.execute(query)
+
+        columns=[
+            description[0] for description in cursor.description
+        ]
+
+        rows=cursor.fetchmany(1000)
+
+        has_more=cursor.fetchone() is not None
+
+        return{
+            "columns":columns,
+            "rows":rows,
+            "row_count":len(rows),
+            "truncated":has_more
+        }
+    except sqlite3.Error as e:
+        return {
+            "error":str(e)
+        }
+
+    finally:
+        if connection is not None:
+            connection.close()
 
 
 if __name__ == "__main__":
     mcp.run()
+
 
 

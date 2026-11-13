@@ -63,7 +63,7 @@ async def main():
                 "content":user_input
             }
         ]
-        max_iterations=5
+        max_iterations=20
 
         for iteration in range(max_iterations):
             response=await client_ai.chat.completions.create(
