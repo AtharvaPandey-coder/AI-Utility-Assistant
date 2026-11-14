@@ -1,7 +1,8 @@
 import asyncio
 import os 
 import json
-
+import sys
+from pathlib import Path
 from dotenv import load_dotenv
 from groq import AsyncGroq
 from mcp import Client,StdioServerParameters
@@ -9,12 +10,14 @@ from mcp import Client,StdioServerParameters
 load_dotenv()
 model='openai/gpt-oss-20b'
 client_ai=AsyncGroq(api_key=os.getenv('GROQ_API_KEY'))
+BASE_DIR=Path(__file__).resolve().parent
 
-async def main():
+async def ask_assistant(user_input):
     server=StdioServerParameters(
-        command="python",
-        args=['server.py']
+        command=sys.executable,
+        args=[str(BASE_DIR / 'server.py')]
     )
+
 
     async with Client(server) as mcp_client:
 
@@ -39,7 +42,7 @@ async def main():
                 print(tool.input_schema)
 
 
-        user_input = input("Ask your AI Utility Assistant: ")
+        
 
         messages =[
             {
@@ -75,9 +78,7 @@ async def main():
             assistant_message=response.choices[0].message
         #check wheter grok wants to call the tool
             if not assistant_message.tool_calls:
-                print("Ask your AI Utility Assistant : ")
-                print(assistant_message.content)
-                break
+                return assistant_message.content or "NO response generated"
 
         #save assistant tool calls message
             messages.append(
@@ -116,8 +117,26 @@ async def main():
                         'content':error_message
                     })
         else:
-            print("\n Maximum Tool execution reached")
-        
+            return "Maximum Tool execution limit  reached."
+
+
+async def main():
+
+    while True :
+        user_input=input(
+            "\n Ask your AI Utility Assistant (type exit to quit) : "
+        )
+
+        if user_input.lower().strip() == "exit":
+            print("goodbye")
+            break
+
+        answer=await ask_assistant(user_input)
+
+        print("Assistant")
+        print(answer)
+
+
 
 if __name__=="__main__":
     asyncio.run(main())
