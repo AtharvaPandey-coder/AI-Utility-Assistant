@@ -26,7 +26,7 @@ for file in csv_files:
 
 connection.close()
 
-print("Database created successfully..")
+print("Database created successfully...")
 
 
 

@@ -48,7 +48,7 @@ async def main():
 
 
 
-        print("ANSWERING")
+        print("ANSWERING..")
         result99=await client.call_tool(
             "get_database_schema",
             arguments={}

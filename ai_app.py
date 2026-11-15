@@ -124,16 +124,16 @@ async def main():
 
     while True :
         user_input=input(
-            "\n Ask your AI Utility Assistant (type exit to quit) : "
+            "\n Ask your AI Utility Assistant. (type exit to quit) : "
         )
 
         if user_input.lower().strip() == "exit":
-            print("goodbye")
+            print("goodbye..")
             break
 
         answer=await ask_assistant(user_input)
 
-        print("Assistant")
+        print("Assistant..")
         print(answer)
 
 
