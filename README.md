@@ -1,14 +1,15 @@
 # MCP AI Utility Assistant 🤖
 
-An AI-powered assistant built using **Python, Model Context Protocol (MCP), Groq LLM, and SQLite**.
+An AI-powered utility and data analytics assistant built using **Python, Model Context Protocol (MCP), Groq LLM, SQLite, Pandas, and Streamlit**.
 
 The project demonstrates how an LLM can dynamically discover, select, and execute external Python tools through an MCP client-server architecture.
 
-It supports mathematical operations, text analysis, AI-powered summarization, sentiment analysis, and database querying tools.
+Users can interact with the assistant through a Streamlit interface, perform text and mathematical operations, upload multiple CSV files, and query different datasets using natural language.
 
 ## 🚀 Features
 
 ### MCP and AI
+
 - MCP client-server architecture.
 - Dynamic discovery of MCP tools.
 - LLM-based tool selection using Groq.
@@ -24,14 +25,28 @@ It supports mathematical operations, text analysis, AI-powered summarization, se
 - Maximum iteration limit to prevent endless tool calls.
 
 ### Database Integration
+
+- Upload multiple CSV files through the Streamlit interface.
 - Import CSV datasets into SQLite using Pandas.
 - Automatically create database tables from CSV filenames.
+- Support for different datasets rather than a fixed dataset.
 - Dynamically inspect database schemas.
 - Retrieve table names and column metadata.
 - Expose database schema inspection through an MCP tool.
+- Generate SQL queries based on natural-language questions.
 - Execute read-only SQL queries through an MCP tool.
 - Return query results with column names and row counts.
 - Limit returned query results to 1,000 rows.
+
+### Streamlit Interface
+
+- Interactive chat interface.
+- Multiple CSV file uploader.
+- Button-based database loading.
+- Display user and assistant messages.
+- Basic conversation history using Streamlit session state.
+- Clear conversation functionality.
+- Error handling for database operations.
 
 ## 🧰 Available MCP Tools
 
@@ -48,27 +63,31 @@ It supports mathematical operations, text analysis, AI-powered summarization, se
 
 ## 🔄 How It Works
 
-1. The user submits a natural-language request.
-2. The MCP client discovers available tools.
-3. MCP tool schemas are converted into Groq-compatible schemas.
-4. Groq selects the appropriate tool and generates its arguments.
-5. The AI application extracts the tool name and arguments.
-6. The MCP client calls the selected server tool.
-7. The MCP server executes the corresponding Python function.
-8. Results are returned to the AI application.
-9. Groq can request additional tools if needed.
-10. The LLM generates the final response.
+1. The user submits a natural-language request through the Streamlit interface.
+2. The AI application connects to the MCP server.
+3. The MCP client discovers the available tools.
+4. MCP tool schemas are converted into Groq-compatible schemas.
+5. Groq selects the appropriate tool and generates its arguments.
+6. The AI application extracts the tool name and arguments.
+7. The MCP client calls the selected server tool.
+8. The MCP server executes the corresponding Python function.
+9. Results are returned to the AI application.
+10. Groq can request additional tools if needed.
+11. The LLM generates the final response.
 
 ## 🗄️ Database Workflow
 
-1. CSV files are placed inside the `data/` directory.
-2. `create_database.py` imports CSV data into SQLite.
-3. `inspect_schema.py` discovers tables and column metadata.
-4. `get_database_schema` exposes schema information through MCP.
-5. `execute_sql_query` executes read-only SQL queries.
-6. Query results are returned to the calling application.
+1. The user uploads one or more CSV files through Streamlit.
+2. The application passes the uploaded files to the database creation function.
+3. Pandas reads the CSV files and imports their contents into SQLite.
+4. Database schema inspection discovers available tables and columns.
+5. The `get_database_schema` MCP tool exposes the schema information.
+6. The LLM uses the discovered schema to determine the appropriate SQL query.
+7. The `execute_sql_query` MCP tool executes the read-only query.
+8. Query results are returned to the AI application.
+9. The LLM interprets the results and generates a natural-language response.
 
-The database tools are designed to work with different CSV datasets rather than being limited to one dataset.
+The database workflow has been tested with different datasets, including pizza sales and student enrollment data.
 
 ## 🏗️ Project Structure
 
@@ -85,15 +104,19 @@ MCP-AI-Utility-Assistant/
 │   ├── create_database.py
 │   └── inspect_schema.py
 │
+├── app.py
 ├── server.py
 ├── client.py
 ├── ai_app.py
 ├── requirements.txt
+├── .env
 ├── .gitignore
 └── README.md
 ```
 
-The SQLite database is generated locally and is excluded from Git tracking.
+The `data/` directory contains sample datasets. Users can also upload their own CSV files through the Streamlit interface.
+
+The SQLite database is generated locally and excluded from Git tracking.
 
 ## 🛠️ Technologies Used
 
@@ -101,11 +124,12 @@ The SQLite database is generated locally and is excluded from Git tracking.
 |---|---|
 | Python | Core programming language |
 | MCP | Communication between AI applications and tools |
-| Groq API | LLM integration and text processing |
+| Groq API | LLM integration and function calling |
 | AsyncIO | Asynchronous operations |
 | Pandas | CSV processing |
 | SQLite | Database storage |
 | SQL | Database queries |
+| Streamlit | Interactive user interface |
 | JSON | Tool schemas and arguments |
 | python-dotenv | Environment variable management |
 
@@ -122,6 +146,11 @@ cd MCP-AI-Utility-Assistant
 
 ```bash
 python -m venv venv
+```
+
+Activate it on Windows:
+
+```bash
 venv\Scripts\activate
 ```
 
@@ -139,34 +168,34 @@ Create a `.env` file in the project root:
 GROQ_API_KEY=your_groq_api_key
 ```
 
-Get your API key from https://console.groq.com/.
+Get your API key from [Groq Console](https://console.groq.com/).
 
 Never upload your `.env` file or expose your API key.
 
 ## ▶️ Running the Project
 
-**Run the MCP client:**
+**Run the Streamlit application:**
+
+```bash
+streamlit run app.py
+```
+
+**Run the MCP client separately:**
 
 ```bash
 python client.py
 ```
 
-**Run the AI application:**
+**Run the AI application through the terminal:**
 
 ```bash
 python ai_app.py
 ```
 
-**Create the SQLite database:**
+**Create the SQLite database from local CSV files:**
 
 ```bash
 python database/create_database.py
-```
-
-**Inspect the database schema:**
-
-```bash
-python database/inspect_schema.py
 ```
 
 ## 🔐 Security
@@ -191,18 +220,18 @@ These safeguards are intended for a learning project and are not a complete prod
 - Asynchronous Python programming.
 - CSV-to-SQLite integration.
 - Dynamic database schema inspection.
+- Natural-language-to-SQL workflows.
 - Read-only SQL execution through MCP.
+- Building interactive AI applications using Streamlit.
 
 ## 🔮 Future Improvements
 
-- [ ] Natural-language to SQL orchestration through the AI application.
-- [ ] Support for multiple uploaded CSV datasets.
-- [ ] Query result interpretation.
+- [ ] Advanced context engineering and conversational memory.
+- [ ] Automatic replacement of previous dataset tables.
+- [ ] Improved CSV validation and error handling.
+- [ ] More advanced SQL validation and execution safeguards.
 - [ ] Charts and data visualizations.
-- [ ] Conversation history and session memory.
-- [ ] Streamlit user interface.
 - [ ] Application deployment.
-- [ ] Improved SQL validation and security.
 
 ## 👨‍💻 Author
 
@@ -214,6 +243,6 @@ AI/ML and Generative AI Enthusiast
 
 ---
 
-**Project Status:** Actively under development.
+**Project Status:** Core functionality implemented and tested with multiple datasets. Further improvements are planned.
 
-Building an MCP-powered AI Data Analytics Assistant.
+Building an MCP-powered AI Utility and Data Analytics Assistant.
