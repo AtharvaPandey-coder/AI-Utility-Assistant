@@ -1,5 +1,6 @@
 import streamlit as st
 import asyncio
+from database.create_database import create_database
 
 from ai_app import ask_assistant
 
@@ -14,6 +15,27 @@ st.write("Ask questions and interact with your AI assistant.")
 
 if "messages" not in st.session_state:
     st.session_state.messages=[]
+
+uploaded_files=st.file_uploader(
+    "Upload CSv Files",
+    type=['csv'],
+    accept_multiple_files=True
+)
+
+if st.button("Load CS Files"):
+
+    if uploaded_files:
+        try:
+            create_database(uploaded_files)
+
+            st.success("File uploaded succesfully..")
+
+            st.session_state.messages=[]
+        except Exception as e:
+            st.error(f"Database error : {str(e)}")
+    else:
+        st.error("UPLOAD CSV FIRST..")
+
 
 
 # displaying the previous messages
